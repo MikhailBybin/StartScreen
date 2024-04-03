@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Управление категориями</h2>
+    <h3>Добавить новую категорию</h3>
+    <form method="post" action="{{ url_for('add_category') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label(class="form-control-label") }}
+            {{ form.name(class="form-control") }}
+            {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {{ form.submit(class="btn btn-success") }}
+    </form>
+<!--    <hr>-->
+<!--    <h3>Существующие категории</h3>-->
+<!--    <ul id="categories-list" class="list-group">-->
+<!--        {% for category in categories %}-->
+<!--        <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ category.id }}">-->
+<!--            <div>-->
+<!--                <input type="text" class="form-control" value="{{ category.name }}" id="name-input-{{ category.id }}">-->
+<!--            </div>-->
+<!--            <div>-->
+<!--                <button onclick="updateCategoryName({{ category.id }})" class="btn btn-sm btn-primary">Сохранить</button>-->
+<!--                <form action="{{ url_for('delete_category', category_id=category.id) }}" method="post" class="d-inline">-->
+<!--                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </li>-->
+<!--        {% endfor %}-->
+<!--    </ul>-->
+  <!-- Существующие категории -->
+<h3>Существующие категории</h3>
+<ul id="categories-list" class="list-group">
+    {% for category in categories|sort(attribute='order') %}
+    <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ category.id }}">
+        <div class="form-inline">
+            <input type="text" class="form-control mb-2 mr-sm-2" value="{{ category.name }}" id="name-input-{{ category.id }}">
+            <button class="btn btn-primary mb-2 save-name" data-id="{{ category.id }}">Сохранить</button>
+        </div>
+        <button class="btn btn-danger delete-category" data-id="{{ category.id }}">Удалить</button>
+    </li>
+    {% endfor %}
+</ul>
+<button id="save-order" class="btn btn-success">Сохранить порядок</button>
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script>
+$(function() {
+    $('#categories-list').sortable({
+        placeholder: "ui-state-highlight",
+        axis: "y"
+    });
+
+    $('#save-order').click(function() {
+        let orderData = $('#categories-list').sortable('toArray', { attribute: 'data-id' });
+        $.ajax({
+            url: "{{ url_for('update_category_order') }}",
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(orderData),
+            success: function(response) {
+                alert("Порядок категорий успешно обновлён!");
+                window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Ошибка: ' + xhr.responseText);
+            }
+        });
+    });
+});
+
+$('.save-name').click(function() {
+    var categoryId = $(this).data('id');
+    var newName = $('#name-input-' + categoryId).val();
+    $.ajax({
+        url: "{{ url_for('update_category_name') }}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ id: categoryId, name: newName }),
+        success: function(response) {
+            alert("Имя категории успешно обновлено!");
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            alert('Ошибка: ' + xhr.responseText);
+        }
+    });
+});
+
+$('.delete-category').click(function() {
+    var categoryId = $(this).data('id');
+    if(confirm("Вы уверены, что хотите удалить эту категорию?")) {
+        $.ajax({
+            url: "/category/delete/" + categoryId,
+            type: 'POST',
+            success: function(response) {
+                alert("Категория удалена успешно!");
+                window.location.reload(); // Перезагрузка страницы, чтобы отразить изменения
+            },
+            error: function(xhr, status, error) {
+                alert('Ошибка: ' + xhr.responseText);
+            }
+        });
+    }
+});
+
+
+</script>
+{% endblock %}

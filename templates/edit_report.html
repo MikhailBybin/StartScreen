@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Редактировать отчет</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.title.label(class="form-control-label") }}
+            {% if form.title.errors %}
+                {{ form.title(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.title.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.title(class="form-control") }}
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.image_id.label(class="form-control-label") }}
+            {% if form.image_id.errors %}
+                {{ form.image_id(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.image_id.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% else %}
+            {{ form.image_id.label(class="form-control-label") }}
+            {{ form.image_id(class="form-control") }}
+            <img id="image_preview" src="" alt="Выбранное изображение" style="max-height: 200px; width: auto; display: block; margin-top: 20px;">
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.url.label(class="form-control-label") }}
+            {% if form.url.errors %}
+                {{ form.url(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.url.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.url(class="form-control") }}
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.date_posted.label(class="form-control-label") }}
+            {% if form.date_posted.errors %}
+                {{ form.date_posted(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.date_posted.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.date_posted(class="form-control") }}
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.category_id.label(class="form-control-label") }}
+            {% if form.category_id.errors %}
+                {{ form.category_id(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.category_id.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.category_id(class="form-control") }}
+            {% endif %}
+        </div>
+
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+{% endblock %}
