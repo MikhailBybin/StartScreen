@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from models import db, Report, Image, Category
-from flask import render_template, request, redirect, url_for, flash
 from datetime import datetime
 from forms import ReportForm, CategoryForm
+from werkzeug.utils import secure_filename
+import os
+import pandas as pd
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -16,6 +20,53 @@ app.config['SECRET_KEY'] = ('b"\xf3\xb3\x1e\xac\x39\x92\xd4\x90\x8d\xeb\x12\xfa\
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Настройка для загрузки файлов
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'xlsx', 'xls'}
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_excel():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('Нет файла')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('Файл не выбран')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            try:
+                df = pd.read_excel(filepath)
+                # Получение списка полей модели для проверки
+                model_columns = {column.name for column in Report.__table__.columns}
+                # Проверка соответствия полей файла и модели
+                if not set(df.columns).issubset(model_columns):
+                    flash('Файл Excel содержит неподдерживаемые столбцы.')
+                    return redirect(request.url)
+                # Загрузка данных в БД
+                for _, row in df.iterrows():
+                    report_args = {column: row[column] for column in model_columns if column in row}
+                    report = Report(**report_args)
+                    db.session.add(report)
+                db.session.commit()
+                flash('Файл успешно загружен и обработан')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Ошибка при обработке файла: {e}')
+            finally:
+                os.remove(filepath)  # Удаляем файл после обработки
+            return redirect(url_for('upload_excel'))
+    return render_template('upload_excel.html')
 
 
 @app.route('/')
@@ -177,9 +228,20 @@ def update_category_name():
 
 @app.route('/reports/<int:category_id>')
 def reports_by_category(category_id):
-    reports = Report.query.filter_by(category_id=category_id).all()
+    reports = Report.query.filter_by(category_id=category_id).order_by(Report.order.asc()).all()
     category = Category.query.get(category_id)
     return render_template('reports_by_category.html', reports=reports, category=category, category_id=category_id)
+
+
+@app.route('/search')
+def search_reports():
+    query = request.args.get('query', '').lower()  # Приводим поисковый запрос к нижнему регистру
+    if query:
+        # Используем функцию lower() для столбца title, чтобы поиск был нечувствителен к регистру
+        reports = Report.query.filter(func.lower(Report.title).like(f'%{query}%')).all()
+    else:
+        reports = []  # Если запрос пустой, возвращаем пустой список
+    return render_template('search_results.html', reports=reports)
 
 
 @app.context_processor

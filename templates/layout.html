@@ -25,16 +25,30 @@
                 <a class="nav-link" href="{{ url_for('reports_by_category', category_id=category.id) }}">{{ category.name }}</a>
             </li>
             {% endfor %}
-            <li class="nav-item">
-                <a href="{{ url_for('add_category') }}" class="nav-link">Управление категориями</a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url_for('manage_reports') }}" class="nav-link">Управление отчетами</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Управление
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ url_for('add_category') }}">Управление категориями</a>
+                    <a class="dropdown-item" href="{{ url_for('manage_reports') }}">Управление отчетами</a>
+                    <a class="dropdown-item" href="{{ url_for('upload_excel') }}">Загрузить из Excel</a>
+                </div>
             </li>
         </ul>
 
     </div>
 </nav>
+
+<div class="row mt-3 justify-content-center">
+    <form action="{{ url_for('search_reports') }}" method="GET">
+        <div class="input-group-append">
+        <input class="form-control" type="text" name="query" placeholder="Поиск по отчетам...">
+        <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+        </div></div>
+    </form>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -52,6 +66,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="{{ url_for('static', filename='script/image_select.js') }}"></script>
 <!--<script src="{{ url_for('static', filename='script/category_order.js') }}"></script>-->

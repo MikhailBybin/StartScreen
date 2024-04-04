@@ -1,0 +1,15 @@
+<!-- templates/upload_excel.html -->
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Загрузка отчетов из Excel</h2>
+    <form action="{{ url_for('upload_excel') }}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Выберите файл Excel:</label>
+            <input type="file" class="form-control-file" id="file" name="file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+    </form>
+</div>
+{% endblock %}

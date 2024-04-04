@@ -7,10 +7,10 @@ migrate = Migrate()
 
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(500), nullable=False)
     image_id = db.Column(db.Integer, db.ForeignKey('image.id'), nullable=False)
     image = db.relationship('Image', backref='reports')
-    url = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(1000), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     category = db.relationship('Category', backref='reports')

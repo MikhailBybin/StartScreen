@@ -1,11 +1,7 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h3>Список отчетов Блока Технической Инфраструктуры</h3>
-    <div class="mb-3">
-        <a href="{{ url_for('add_report') }}" class="btn btn-success">Добавить отчет</a>
-    </div>
+    <h2>Результаты поиска</h2>
     <div class="row">
         {% for report in reports %}
         <div class="col-md-4 mb-4">
@@ -31,5 +27,4 @@
         <p>Отчеты не найдены.</p>
         {% endfor %}
     </div>
-</div>
 {% endblock %}
