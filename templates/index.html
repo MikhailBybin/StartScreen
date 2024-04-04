@@ -20,16 +20,15 @@
                             </form>
                         </div>
                     </div>
-                    <img src="{{ url_for('static', filename=report.image.file_path[7:]) }}" class="card-img-top mt-2" alt="{{ report.title }}">
-                    <p class="card-text">Категория: {{ report.category.name }}</p>
-                    <div class="btn-group">
-                        <a href="{{ report.url }}" class="btn btn-sm btn-outline-secondary">Перейти к отчету</a>
-                    </div>
-                    <br><small class="text-muted">Опубликован: {{ report.date_posted.strftime('%Y-%m-%d') }}</small>
-                </div>
+            <img src="{{ url_for('static', filename=report.image.file_path[7:]) }}" class="card-img-top mt-2" alt="{{ report.title }}">
+            <p class="card-text">Категория: {{ report.category.name }}</p>
+            <div class="btn-group">
+                <a href="{{ report.url }}" class="btn btn-sm btn-outline-secondary">Перейти к отчету</a>
             </div>
+            <br><small class="text-muted">Опубликован: {{ report.date_posted.strftime('%Y-%m-%d') }}</small>
         </div>
-
+    </div>
+</div>
         {% else %}
         <p>Отчеты не найдены.</p>
         {% endfor %}

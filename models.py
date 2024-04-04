@@ -14,6 +14,7 @@ class Report(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     category = db.relationship('Category', backref='reports')
+    order = db.Column(db.Integer, default=0)
 
 
 class Image(db.Model):

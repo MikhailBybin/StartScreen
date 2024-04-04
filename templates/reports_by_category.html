@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h3>Список отчетов Блока Технической Инфраструктуры {{ category_name }}</h3>
     <div class="mb-3">
-        <a href="{{ url_for('add_report') }}" class="btn btn-success">Добавить отчет</a>
+        <a href="{{ url_for('add_report', category_id=category_id) }}" class="btn btn-success">Добавить отчет</a>
     </div>
     <div class="row">
         {% for report in reports %}

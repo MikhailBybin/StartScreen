@@ -28,19 +28,25 @@ def index():
 def add_report():
     form = ReportForm()
     images = Image.query.all()
+    category_id = request.args.get('category_id', None, type=int)
+    categories = Category.query.order_by(Category.order.asc()).all()
     if form.validate_on_submit():
+
+        max_order = db.session.query(db.func.max(Report.order)).filter_by(
+            category_id=form.category_id.data).scalar() or 0
         new_report = Report(
             title=form.title.data,
             image_id=form.image_id.data,
             url=form.url.data,
             date_posted=form.date_posted.data,
-            category_id=form.category_id.data
+            category_id=form.category_id.data,
+            order=max_order + 1
         )
         db.session.add(new_report)
         db.session.commit()
         flash('Отчет успешно добавлен!', 'success')
-        return redirect(url_for('index'))
-    return render_template('add_report.html', form=form, images=images)
+        return redirect(url_for('index'))  # или другая целевая страница после добавления
+    return render_template('add_report.html', form=form, images=images, category_id=category_id, categories=categories)
 
 
 @app.route('/edit-report/<int:report_id>', methods=['GET', 'POST'])
@@ -68,6 +74,14 @@ def edit_report(report_id):
     return render_template('edit_report.html', form=form)
 
 
+@app.route('/manage-reports')
+# @login_required
+def manage_reports():
+    categories = Category.query.order_by(Category.order.asc()).all()
+    sorted_reports = {category.id: sorted(category.reports, key=lambda report: report.order) for category in categories}
+    return render_template('manage_reports.html', categories=categories, sorted_reports=sorted_reports, Report=Report)
+
+
 @app.route('/report/delete/<int:report_id>', methods=['POST'])
 def delete_report(report_id):
     report = Report.query.get_or_404(report_id)
@@ -79,6 +93,19 @@ def delete_report(report_id):
         db.session.rollback()
         flash('Произошла ошибка при попытке удаления отчета.', 'error')
     return redirect(url_for('index'))
+
+
+@app.route('/update-report-order-and-category', methods=['POST'])
+# @login_required
+def update_report_order_and_category():
+    data = request.get_json()
+    for reportData in data:
+        report = Report.query.get(reportData['id'])
+        if report:
+            report.order = reportData['order']
+            report.category_id = reportData['new_category_id']
+    db.session.commit()
+    return jsonify({'message': 'Порядок и категории отчетов обновлены.'})
 
 
 @app.route('/category/add', methods=['GET', 'POST'])
@@ -151,7 +178,8 @@ def update_category_name():
 @app.route('/reports/<int:category_id>')
 def reports_by_category(category_id):
     reports = Report.query.filter_by(category_id=category_id).all()
-    return render_template('reports_by_category.html', reports=reports)
+    category = Category.query.get(category_id)
+    return render_template('reports_by_category.html', reports=reports, category=category, category_id=category_id)
 
 
 @app.context_processor
