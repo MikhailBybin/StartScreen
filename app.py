@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 import os
 import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -235,12 +234,11 @@ def reports_by_category(category_id):
 
 @app.route('/search')
 def search_reports():
-    query = request.args.get('query', '').lower()  # Приводим поисковый запрос к нижнему регистру
+    query = request.args.get('query')
     if query:
-        # Используем функцию lower() для столбца title, чтобы поиск был нечувствителен к регистру
-        reports = Report.query.filter(func.lower(Report.title).like(f'%{query}%')).all()
+        reports = Report.query.filter(Report.title.like(f'%{query}%')).all()
     else:
-        reports = []  # Если запрос пустой, возвращаем пустой список
+        reports = []
     return render_template('search_results.html', reports=reports)
 
 
